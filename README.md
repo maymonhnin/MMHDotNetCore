@@ -45,7 +45,7 @@ SLH -> Collin
 
 1. SLH (-10000)
 2. Collin (+10000)
-
+-------------------------------------------------------------------
 ## Day2 Notes
 
 C# <=> Database
@@ -105,8 +105,48 @@ Console.WriteLine("Connection opening...");
 connection.Open();
 Console.WriteLine("Connection opened.");
 
-// 
+// sql query ရေးရတော့မယ် 
+string query = @"SELECT [BlogId]
+      ,[BlogTitle]
+      ,[BlogAuthor]
+      ,[BlogContent]
+      ,[DeleteFlag]
+  FROM [dbo].[Tbl_Blog] where DeleteFlag = 0";
+  *query ကို db server ထဲ query execute အရင်လုပ်ပြီးမှ ထည့်သုံးကြည့် (issue ကင်းအောင်)*
+
+// sql command ဖွင့် (ကိုယ် open လုပ်မယ့် db connection, execute လုပ်မယ့် query တို့ကို သုံးပြီးတော့ )
+SqlCommand cmd = new SqlCommand(query, connection);
+
+// table ထည့်ဖို့အတွက် adapter ‌ဆောက်, အလုပ်လုပ်မယ့် command ထည့်, datatable ဆောက်, adapter ထဲကို datatable ထည့်
+SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+DataTable dt = new DataTable();
+adapter.Fill(dt);
+
+// connection မပိတ်ခင်မှာ data record တစ်ကြောင်းချင်းစီ (query တစ်ကြောင်းချင်းစီ) read လုပ်တာ ပိုပြီး performance ကောင်းတယ် ( အဲ့လို မဟုတ်ဘဲ connection ပိတ်ပြီးမှ data table တစ်ခုလုံး ထုတ်ပြရင် connection timeout issue ဖြစ်နိုင်) 
+SqlDataReader reader = cmd.ExecuteReader();
+while (reader.Read())
+{
+    Console.WriteLine(reader["BlogID"]);
+    Console.WriteLine(reader["BlogTitle"]);
+    Console.WriteLine(reader["BlogAuthor"]);
+    Console.WriteLine(reader["BlogContent"]);
+}
+
 
 Console.WriteLine("Connection closing...");
 connection.Close();
 Console.WriteLine("Connection closed.");
+
+// to show table result in console
+// Dataset => collection of table data
+// Dataset >> DataTable >> DataRow >> DataColumn
+foreach (DataRow dr in dt.Rows)
+{
+    Console.WriteLine(dr["BlogID"]);
+    Console.WriteLine(dr["BlogTitle"]);
+    Console.WriteLine(dr["BlogAuthor"]);
+    Console.WriteLine(dr["BlogContent"]);
+    //Console.WriteLine(dr["DeleteFlag"]);
+}
+-----------------------------------------------------------------------
+##
